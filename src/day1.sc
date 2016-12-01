@@ -21,7 +21,7 @@ object day1 {
       case West => Location(x - 1, y)
     }
 
-    def distance(): Int = x + y
+    def distance(): Int = x.abs() + y.abs()
   }
 
   // the instructions
@@ -74,7 +74,7 @@ object day1 {
   val commands: List[Instruction] = input.flatMap(parseInstructions)
 
   val initialState: State = State(Location(0, 0), North, Set(), Option.empty)
-  val finish: State = commands.foldLeft(initialState)((state, command) => state.follow(command))
+  val finish: State = commands.foldLeft(initialState)((state, instruction) => state.follow(instruction))
   finish.distance
   finish.firstVisited
 
