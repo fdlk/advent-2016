@@ -1,7 +1,9 @@
+import scala.io.Source._
 import scala.util.matching.Regex
 
 object day1 {
-  val input: List[String] = common.loadPackets(List("day1.txt")).head.split(", ").toList
+  val lines: List[String] = fromInputStream(getClass.getResourceAsStream("day1.txt")).getLines.toList
+  val input: List[String] = lines.head.split(", ").toList
 
   // The city grid
   sealed trait Direction {
@@ -21,7 +23,7 @@ object day1 {
       case West => Location(x - 1, y)
     }
 
-    def distance(): Int = x.abs() + y.abs()
+    def distance(): Int = x.abs + y.abs
   }
 
   // the instructions
