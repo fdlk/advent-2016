@@ -6,12 +6,10 @@ object day3 {
   type Triangle = List[Int]
   val triangles: List[Triangle] = lines.map(_.trim.split("\\s+").toList.map(_.toInt))
 
-  def isPossible(triangle: Triangle): Boolean =
-    (for {
-      dims <- triangle.permutations
-      dim1 :: dim2 :: dim3 :: _ = dims
-      if dim1 + dim2 <= dim3
-    } yield false).isEmpty
+  def isPossible(triangle: Triangle): Boolean = {
+    val a :: b :: c :: Nil = triangle.sorted
+    a + b > c
+  }
 
   triangles.count(isPossible)
 
