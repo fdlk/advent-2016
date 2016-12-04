@@ -5,7 +5,7 @@ object day4 {
 
   case class Room(name: String, sectorID: Int, checksum: String) {
     def leterFrequencySort(a: (Char, Int), b: (Char, Int)): Boolean = {
-      if (a._2 == b._2) a._1.toInt < b._1.toInt else a._2 > b._2
+      if (a._2 == b._2) a._1 < b._1 else a._2 > b._2
     }
 
     def computedChecksum: String = {
