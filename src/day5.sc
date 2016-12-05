@@ -9,7 +9,7 @@ object day5 {
   def computeHash(text: String): Array[Byte] = initializedDigest.digest(text.getBytes)
 
   def isInteresting(hash: Array[Byte]): Boolean = {
-    (hash(0) == 0x0) && (hash(1) == 0x0) && ((hash(2) | 0xF) == 0xF)
+    (hash(0) == 0x0) && (hash(1) == 0x0) && ((hash(2) & 0xF0) == 0x0)
   }
 
   def format(bytes: Array[Byte]): String = bytes.map("%02x".format(_)).mkString
