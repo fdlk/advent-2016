@@ -1,4 +1,5 @@
 import java.security.MessageDigest
+import scala.annotation.tailrec
 
 object day5 {
   val digest: MessageDigest = MessageDigest.getInstance("MD5")
@@ -20,8 +21,9 @@ object day5 {
 
   def getPosAndChar(hash: String): (Char, Char) = (hash.charAt(5), hash.charAt(6))
 
-  def solve(interestingHashes: Stream[(Char, Char)], solution: List[Option[Char]]): List[Option[Char]] =
-    if (solution.forall(_.isDefined)) solution
+  @tailrec
+  def solve(interestingHashes: Stream[(Char, Char)], solution: List[Option[Char]]): String =
+    if (solution.forall(_.isDefined)) solution.map(_.get).mkString
     else interestingHashes match {
       case (p, v) #:: rest if p > '7' => solve(rest, solution)
       case (p, v) #:: rest if solution(p.toInt - '0'.toInt).isDefined => solve(rest, solution)
@@ -31,5 +33,5 @@ object day5 {
       }
     }
 
-  val part2 = solve(hashStream.map(getPosAndChar), List(None, None, None, None, None, None, None, None)).map(_.get) mkString
+  val part2 = solve(hashStream.map(getPosAndChar), List(None, None, None, None, None, None, None, None))
 }
