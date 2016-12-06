@@ -1,11 +1,12 @@
 import java.security.MessageDigest
+
 import scala.annotation.tailrec
 
 object day5 {
   val digest: MessageDigest = MessageDigest.getInstance("MD5")
   digest.update("reyedfim".getBytes)
 
-  def initializedDigest = digest.clone.asInstanceOf[MessageDigest]
+  def initializedDigest: MessageDigest = digest.clone.asInstanceOf[MessageDigest]
 
   def computeHash(text: String): Array[Byte] = initializedDigest.digest(text.getBytes)
 
@@ -15,9 +16,9 @@ object day5 {
 
   def format(bytes: Array[Byte]): String = bytes.map("%02x".format(_)).mkString
 
-  val hashStream = Stream.from(1).map(_.toString).map(computeHash).filter(isInteresting).map(format)
+  val hashStream: Stream[String] = Stream.from(1).map(_.toString).map(computeHash).filter(isInteresting).map(format)
 
-  val part1 = hashStream.take(8).map(_.charAt(5)).toList.mkString
+  val part1: String = hashStream.take(8).map(_.charAt(5)).toList.mkString
 
   def getPosAndChar(hash: String): (Char, Char) = (hash.charAt(5), hash.charAt(6))
 
@@ -27,11 +28,10 @@ object day5 {
     else interestingHashes match {
       case (p, v) #:: rest if p > '7' => solve(rest, solution)
       case (p, v) #:: rest if solution(p.toInt - '0'.toInt).isDefined => solve(rest, solution)
-      case (p, v) #:: rest => {
+      case (p, v) #:: rest =>
         println(solution.map(_.getOrElse('_')).mkString)
         solve(rest, solution.updated(p.toInt - '0', Some(v)))
-      }
     }
 
-  val part2 = solve(hashStream.map(getPosAndChar), List(None, None, None, None, None, None, None, None))
+  val part2: String = solve(hashStream.map(getPosAndChar), List(None, None, None, None, None, None, None, None))
 }
