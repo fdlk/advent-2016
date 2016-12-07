@@ -12,15 +12,15 @@ object day7 {
 
   def hasABBA(s: String): Boolean = s.sliding(4).exists(isABBA)
 
-  val withinBracketsRegex: Regex = """\[([a-z]+)\]""".r
+  val WITHIN_BRACKETS = """\[([a-z]+)\]"""
+  val withinBracketsRegex: Regex = WITHIN_BRACKETS.r
 
   def hasABBAWithinBrackets(line: String): Boolean =
     getBracketContents(line).exists(hasABBA)
 
-  def getBracketContents(line: String): List[String] = withinBracketsRegex.findAllMatchIn(line).map(_.group(1)).toList
+  def getBracketContents(line: String): Iterator[String] = withinBracketsRegex.findAllMatchIn(line).map(_.group(1))
 
-  def hasABBAOutsideBrackets(line: String): Boolean =
-    hasABBA(withinBracketsRegex.replaceAllIn(line, "[]"))
+  def hasABBAOutsideBrackets(line: String): Boolean = line.split(WITHIN_BRACKETS).exists(hasABBA)
 
   def supportsTLS(line: String): Boolean = hasABBAOutsideBrackets(line) && !hasABBAWithinBrackets(line)
 
@@ -38,11 +38,14 @@ object day7 {
     case a :: b :: _ :: Nil => List(b, a, b).mkString
   }
 
-  def supportsSSL(line: String): Boolean = {
-    getABAs(withinBracketsRegex.replaceAllIn(line, "[]")).exists(
-      aba => getBracketContents(line).exists(
+  def partsOutsideBrackets(line: String): List[String] =
+    line.split(WITHIN_BRACKETS).toList
+
+  def supportsSSL(line: String): Boolean =
+    partsOutsideBrackets(line).exists(part =>
+      getABAs(part).exists(aba => getBracketContents(line).exists(
         _.contains(bab(aba))))
-  }
+    )
 
   lines.count(supportsSSL)
 }
