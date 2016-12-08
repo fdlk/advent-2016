@@ -5,6 +5,15 @@ object day8 {
 
   val lines: List[String] = fromInputStream(getClass.getResourceAsStream("day8.txt")).getLines.toList
 
+  // Part 1
+  val rect: Regex = """rect ([0-9]+)x([0-9]+)""".r
+
+  lines.map( _ match {
+    case rect(row, col) => row.toInt * col.toInt
+    case default => 0
+  }).sum
+
+  // Part 2
   case class Board(leds: List[List[Boolean]]) {
     override def toString: String = "\n" + leds.map(_.map(if (_) '#' else '.').mkString).mkString("\n")
 
@@ -38,7 +47,6 @@ object day8 {
     def emptyBoard(rows: Int, cols: Int): Board = newBoard(rows, cols, (_, _) => false)
   }
 
-  val rect: Regex = """rect ([0-9]+)x([0-9]+)""".r
   val rotateRow: Regex = """rotate row y=([0-9]+) by ([0-9]+)""".r
   val rotateCol: Regex = """rotate column x=([0-9]+) by ([0-9]+)""".r
 
@@ -51,5 +59,6 @@ object day8 {
   val emptyBoard: Board = Board.emptyBoard(6, 50)
   val doneBoard: Board = lines.foldLeft(emptyBoard)(update)
 
+  // check if the Part 1 trick worked
   doneBoard.voltage
 }
