@@ -56,17 +56,10 @@ object day10 {
   }
 
   // Define solution
-  def part1(stateMap: StateMap): Option[Target] =
-    stateMap.find(target => target._2.chips == Set(Chip(61), Chip(17))).map(_._1)
-
-  def part2(stateMap: StateMap): Option[Int] = {
-    val nrs: Set[Int] = Set(Output(0), Output(1), Output(2)).map(stateMap(_)).flatMap(_.chips).map(_.nr)
-    if (nrs.size == 3) Some(nrs.product) else None
-  }
-
-  def solution(state: StateMap): Option[(Target, Int)] = for (
-    part1 <- part1(state);
-    part2 <- part2(state)
+  def solution(stateMap: StateMap): Option[(Target, Int)] = for (
+    part1 <- stateMap.find(target => target._2.chips == Set(Chip(61), Chip(17))).map(_._1);
+    nrs = Set(Output(0), Output(1), Output(2)).map(stateMap(_)).flatMap(_.chips).map(_.nr);
+    part2 = nrs.product if (nrs.size == 3)
   ) yield (part1, part2)
 
   // And solve!
