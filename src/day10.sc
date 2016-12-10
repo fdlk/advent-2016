@@ -14,32 +14,20 @@ object day10 {
 
   case class Output(nr: Int) extends Target
 
-  case class Chip(nr: Int)
-
   case class Give(from: Bot, low: Target, high: Target) extends Instruction
 
-  case class Grab(bot: Bot, value: Chip) extends Instruction
+  case class Grab(bot: Bot, value: Int) extends Instruction
 
-  case class Contents(chips: Set[Chip]) {
-    def receive(chip: Chip) = Contents(chips + chip)
-
-    def canGive: Boolean = chips.size == 2
-
-    def low: Chip = chips.minBy(_.nr)
-
-    def high: Chip = chips.maxBy(_.nr)
-  }
-
-  type StateMap = Map[Target, Contents]
+  type StateMap = Map[Target, Set[Int]]
 
   def followInstruction(state: StateMap, i: Instruction): StateMap = i match {
-    case Give(from, low, high) if state(from).canGive =>
+    case Give(from, low, high) if state(from).size == 2 =>
       state
-        .updated(from, Contents(Set()))
-        .updated(low, state(low).receive(state(from).low))
-        .updated(high, state(high).receive(state(from).high))
+        .updated(from, Set())
+        .updated(low, state(low) + state(from).min)
+        .updated(high, state(high) + state(from).max)
     case Grab(bot, chip) =>
-      state.updated(bot, state(bot).receive(chip))
+      state.updated(bot, state(bot) + chip)
     case default => state
   }
 
@@ -52,14 +40,14 @@ object day10 {
     case give(from, lowType, low, highType, high) => Give(Bot(from.toInt),
       if (lowType == "bot") Bot(low.toInt) else Output(low.toInt),
       if (highType == "bot") Bot(high.toInt) else Output(high.toInt))
-    case grab(chip, bot) => Grab(Bot(bot.toInt), Chip(chip.toInt))
+    case grab(chip, bot) => Grab(Bot(bot.toInt), chip.toInt)
   }
 
   // Define solution
   def solution(stateMap: StateMap): Option[(Target, Int)] = for (
-    part1 <- stateMap.find(target => target._2.chips == Set(Chip(61), Chip(17))).map(_._1);
-    nrs = Set(Output(0), Output(1), Output(2)).map(stateMap(_)).flatMap(_.chips).map(_.nr);
-    part2 = nrs.product if (nrs.size == 3)
+    part1 <- stateMap.find(target => target._2 == Set(61, 17)).map(_._1);
+    nrs = Set(Output(0), Output(1), Output(2)).flatMap(stateMap(_));
+    part2 = nrs.product if nrs.size == 3
   ) yield (part1, part2)
 
   // And solve!
@@ -70,6 +58,6 @@ object day10 {
     states.flatMap(solution).headOption.getOrElse(solve(states.last))
   }
 
-  val initialState: StateMap = Map().withDefaultValue(Contents(Set()))
+  val initialState: StateMap = Map().withDefaultValue(Set())
   solve(initialState)
 }
