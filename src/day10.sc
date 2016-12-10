@@ -24,7 +24,7 @@ object day10 {
 
   // Define solution
   def solution(stateMap: StateMap): Option[(String, Int)] = for (
-    part1 <- stateMap.find(target => target._2 == Set(61, 17)).map(_._1);
+    part1 <- stateMap.find(_._2 == Set(61, 17)).map(_._1);
     nrs = Set("output 0", "output 1", "output 2").flatMap(stateMap(_));
     part2 = nrs.product if nrs.size == 3
   ) yield (part1, part2)
