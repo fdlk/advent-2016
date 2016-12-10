@@ -4,11 +4,10 @@ import scala.util.matching.Regex
 object day10 {
   type StateMap = Map[String, Set[Int]]
 
-  val instructions: List[String] =
-    fromInputStream(getClass.getResourceAsStream("day10.txt")).getLines.toList
+  val instructions: List[String] = fromInputStream(getClass.getResourceAsStream("day10.txt")).getLines.toList
 
-  val grab: Regex =
-    """value ([0-9]+) goes to (bot [0-9]+)""".r
+  val grab: Regex = """value ([0-9]+) goes to (bot [0-9]+)""".r
+
   val give: Regex = """(bot [0-9]+) gives low to ((bot|output) [0-9]+) and high to ((bot|output) [0-9]+)""".r
 
   def followInstruction(state: StateMap, i: String): StateMap = i match {
