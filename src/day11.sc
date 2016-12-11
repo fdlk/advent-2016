@@ -38,9 +38,6 @@ object day11 {
       if (isValid(newState)) Some(newState) else None
   }
 
-  val initialState: State = Map(("E", 1), ("HM", 1), ("LM", 1), ("HG", 2), ("LG", 3))
-  val finalState: State = Map(("E", 4), ("HM", 4), ("LM", 4), ("HG", 4), ("LG", 4))
-
   def possibleMoves(state: State): Set[Move] = {
     val currentFloor: Int = state("E")
     val candidates: List[String] = state.filter(item => item._2 == currentFloor && item._1 != "E").keys.toList
@@ -61,11 +58,8 @@ object day11 {
     result -- visited
   }
 
-  possibleMoves(initialState)
-  val gen0 = Set(initialState)
-
   def solve(open: Set[State], closed: Set[State], steps: Int): Int = {
-    println(steps)
+    println(steps, open.size)
     if (open.contains(finalState)) steps
     else {
       val next = nextGen(open, closed)
@@ -73,27 +67,20 @@ object day11 {
     }
   }
 
-  solve(gen0, gen0, 0)
+  /*
+  The first floor contains a strontium generator, a strontium-compatible microchip, a plutonium generator, and a plutonium-compatible microchip.
+The second floor contains a thulium generator, a ruthenium generator, a ruthenium-compatible microchip, a curium generator, and a curium-compatible microchip.
+The third floor contains a thulium-compatible microchip.
+The fourth floor contains nothing relevant.
+   */
 
-  val moves: List[Move] = List(
-    Move(List("HM"), Up),
-    Move(List("HG", "HM"), Up),
-    Move(List("HM"), Down),
-    Move(List("HM"), Down),
-    Move(List("HM", "LM"), Up),
-    Move(List("HM", "LM"), Up),
-    Move(List("HM", "LM"), Up),
-    Move(List("HM"), Down),
-    Move(List("HG", "LG"), Up),
-    Move(List("LM"), Down),
-    Move(List("HM", "LM"), Up))
+  val initialState: State = Map(
+    ("E", 1), ("SG", 1), ("SM", 1), ("PG", 1), ("PM", 1),
+    ("TG", 2), ("RG", 2), ("RM", 2), ("CG", 2), ("CM", 2),
+    ("TM", 3)
+  )
+  val finalState: State = initialState.mapValues(_ => 4)
 
-
-  val someInitialState: Option[State] = Some(initialState)
-
-  def tryDoMove(s: Option[State], m: Move): Option[State] = {
-    s.flatMap(x => doMove(x, m))
-  }
-
-  val solution: Seq[Option[State]] = moves.scanLeft(someInitialState)(tryDoMove)
+  val part1: Set[State] = Set(initialState)
+  val result: Int = solve(part1, part1, 0)
 }
