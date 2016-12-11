@@ -22,8 +22,8 @@ object day11 {
   case class GenericState(pairs: List[List[Int]], elf: Int)
 
   def toGenericState(state: State): GenericState = {
-    val itemPairs: List[List[String]] = state.keys.filter(_ != "E").toList.sorted.grouped(2).toList
-    val floorPairs: List[List[Int]] = itemPairs.map(_.map(key => state(key))).sortBy(_ (1)).sortBy(_ (0))
+    val itemPairs: List[List[(String, Int)]] = state.filter(_._1 != "E").toList.sortBy(_._1).grouped(2).toList
+    val floorPairs: List[List[Int]] = itemPairs.map(_.map(_._2)).sortBy(_ (1)).sortBy(_ (0))
     GenericState(pairs = floorPairs, elf = state("E"))
   }
 
