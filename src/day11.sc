@@ -58,12 +58,12 @@ object day11 {
     result -- visited
   }
 
-  def solve(open: Set[State], closed: Set[State], steps: Int): Int = {
+  def solve(open: Set[State], closed: Set[State], finalState: State, steps: Int): Int = {
     println(steps, open.size)
     if (open.contains(finalState)) steps
     else {
       val next = nextGen(open, closed)
-      solve(next, closed ++ next, steps + 1)
+      solve(next, closed ++ next, finalState, steps + 1)
     }
   }
 
@@ -74,13 +74,15 @@ The third floor contains a thulium-compatible microchip.
 The fourth floor contains nothing relevant.
    */
 
-  val initialState: State = Map(
+  val initialState1: State = Map(
     ("E", 1), ("SG", 1), ("SM", 1), ("PG", 1), ("PM", 1),
     ("TG", 2), ("RG", 2), ("RM", 2), ("CG", 2), ("CM", 2),
     ("TM", 3)
   )
-  val finalState: State = initialState.mapValues(_ => 4)
+  val finalState1: State = initialState1.mapValues(_ => 4)
+  val part1: Int = solve(Set(initialState1), Set(initialState1), finalState1, 0)
 
-  val part1: Set[State] = Set(initialState)
-  val result: Int = solve(part1, part1, 0)
+  val initialState2: State = initialState1 ++ Map(("EG", 1), ("EM", 1), ("DG", 1), ("DM", 1))
+  val finalState2: State = initialState2.mapValues(_ => 4)
+  val part2: Int = solve(Set(initialState2), Set(initialState2), finalState2, 0)
 }
