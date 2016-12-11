@@ -1,6 +1,5 @@
-object day11 {
 
-  type State = Map[String, Int]
+object day11 {
 
   sealed trait Direction
 
@@ -10,6 +9,22 @@ object day11 {
 
   object Down extends Direction {
     override def toString = "Down"
+  }
+
+  type State = Map[String, Int]
+
+  val initialState1: State = Map(
+    ("E", 1), ("SG", 1), ("SM", 1), ("PG", 1), ("PM", 1),
+    ("TG", 2), ("RG", 2), ("RM", 2), ("CG", 2), ("CM", 2),
+    ("TM", 3)
+  )
+
+  case class GenericState(pairs: List[List[Int]], elf: Int)
+
+  def toGenericState(state: State): GenericState = {
+    val itemPairs: List[List[String]] = state.keys.filter(_ != "E").toList.sorted.grouped(2).toList
+    val floorPairs: List[List[Int]] = itemPairs.map(_.map(key => state(key))).sortBy(_ (1)).sortBy(_ (0))
+    GenericState(pairs = floorPairs, elf = state("E"))
   }
 
   case class Move(items: List[String], direction: Direction)
@@ -49,21 +64,21 @@ object day11 {
     result.toSet
   }
 
-  def nextGen(states: Set[State], visited: Set[State]): Set[State] = {
+  def nextGen(states: Set[State], visited: Set[GenericState]): Set[State] = {
     val result: Set[State] = for (
       state: State <- states;
       move: Move <- possibleMoves(state);
       newState: State <- doMove(state, move)
     ) yield newState
-    result -- visited
+    result.filter(state => !visited.contains(toGenericState(state)))
   }
 
-  def solve(open: Set[State], closed: Set[State], finalState: State, steps: Int): Int = {
+  def solve(open: Set[State], closed: Set[GenericState], finalState: State, steps: Int): Int = {
     println(steps, open.size)
     if (open.contains(finalState)) steps
     else {
       val next = nextGen(open, closed)
-      solve(next, closed ++ next, finalState, steps + 1)
+      solve(next, closed ++ next.map(toGenericState), finalState, steps + 1)
     }
   }
 
@@ -74,15 +89,11 @@ The third floor contains a thulium-compatible microchip.
 The fourth floor contains nothing relevant.
    */
 
-  val initialState1: State = Map(
-    ("E", 1), ("SG", 1), ("SM", 1), ("PG", 1), ("PM", 1),
-    ("TG", 2), ("RG", 2), ("RM", 2), ("CG", 2), ("CM", 2),
-    ("TM", 3)
-  )
+
   val finalState1: State = initialState1.mapValues(_ => 4)
-  val part1: Int = solve(Set(initialState1), Set(initialState1), finalState1, 0)
+  val part1: Int = solve(Set(initialState1), Set(toGenericState(initialState1)), finalState1, 0)
 
   val initialState2: State = initialState1 ++ Map(("EG", 1), ("EM", 1), ("DG", 1), ("DM", 1))
   val finalState2: State = initialState2.mapValues(_ => 4)
-  val part2: Int = solve(Set(initialState2), Set(initialState2), finalState2, 0)
+  val part2: Int = solve(Set(initialState2), Set(toGenericState(initialState2)), finalState2, 0)
 }
