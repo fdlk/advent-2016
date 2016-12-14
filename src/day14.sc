@@ -2,8 +2,6 @@ import java.security.MessageDigest
 import javax.xml.bind.DatatypeConverter.printHexBinary
 
 object day14 {
-  val key = "jlmsuwbz"
-
   def md5(s: String): String = printHexBinary(MessageDigest.getInstance("MD5").digest(s.getBytes)).toLowerCase
 
   def stretchedHash(hash: String): String = Iterator.iterate(hash)(md5).drop(2017).next
@@ -19,6 +17,7 @@ object day14 {
     }
   }
 
-  keyIndices(Stream.from(0).map(index => (index, md5(key + index)))).drop(63).head
-  keyIndices(Stream.from(0).map(index => (index, stretchedHash(key + index)))).drop(63).head
+  val salt = "jlmsuwbz"
+  keyIndices(Stream.from(0).map(index => (index, md5(salt + index)))).drop(63).head
+  keyIndices(Stream.from(0).map(index => (index, stretchedHash(salt + index)))).drop(63).head
 }
