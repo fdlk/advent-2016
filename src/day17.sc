@@ -19,60 +19,32 @@ object day17 {
 
     def right: Option[State] = if (isOpen(3) && col < 3) Some(State(movesTaken + 'R', row, col + 1)) else None
 
-    def neighbors = for (direction <- List(up, down, left, right) if direction.isDefined) yield direction.get
+    def neighbors: List[State] = for (direction <- List(up, down, left, right) if direction.isDefined) yield direction.get
 
-    def finished(): Boolean = row == 3 && col == 3
+    def finished: Boolean = row == 3 && col == 3
   }
 
-  def heuristicCostToGoal(s: State): Int = 0 //Dijkstra
+  def nextGen(states: List[State]): List[State] = for (
+    state <- states;
+    nextState <- state.neighbors
+  ) yield nextState
 
-  def aStar(start: State): Option[List[State]] = {
-    aStarInternal(Set(), Set(start), Map(),
-      Map[State, Int]().withDefault(s => Int.MaxValue).updated(start, 0),
-      Map[State, Int]().withDefault(s => Int.MaxValue).updated(start, heuristicCostToGoal(start)))
+  val gen0: List[State] = List(State("", 0, 0))
+
+  def part1(gen: List[State]): String = {
+    gen.find(_.finished).map(_.movesTaken).getOrElse(part1(nextGen(gen)))
   }
 
-  @scala.annotation.tailrec
-  def aStarInternal(closedSet: Set[State],
-                    openSet: Set[State],
-                    cameFrom: Map[State, State],
-                    gScore: Map[State, Int],
-                    fScore: Map[State, Int]): Option[List[State]] = {
-    if (openSet.isEmpty) {
-      None
-    } else {
-      val current = openSet.minBy(fScore.get)
-      if (current.finished) {
-        Some(reconstructPath(cameFrom, current, Nil))
-      } else {
-        val newGScores = (for (
-          neighbor <- current.neighbors if !closedSet.contains(neighbor);
-          tentativeGScore = gScore(current) + 1 // number of moves
-          if !openSet.contains(neighbor) || tentativeGScore < gScore(neighbor)
-        ) yield neighbor -> tentativeGScore)
-          .toMap
-          .withDefaultValue(Int.MaxValue)
-        aStarInternal(closedSet + current,
-          openSet - current ++ newGScores.keySet,
-          cameFrom ++ newGScores.keySet.map(neighbor => neighbor -> current).toMap,
-          gScore ++ newGScores,
-          fScore ++ newGScores.map({ case (state, score) => (state, score + heuristicCostToGoal(state)) }))
-      }
+  part1(gen0)
+
+  def part2(gen: List[State], longestSoFar: Int): Int = {
+    if (gen.isEmpty) longestSoFar
+    else {
+      val (done, notDone) = nextGen(gen).partition(_.finished)
+      val newLongest: Int = done.headOption.map(_.movesTaken.length).getOrElse(longestSoFar)
+      part2(notDone, newLongest)
     }
   }
 
-  def reconstructPath(cameFrom: Map[State, State], current: State, totalPath: List[State]): List[State] = {
-    cameFrom
-      .get(current)
-      .map(s => reconstructPath(cameFrom, s, totalPath ++ List(current)))
-      .getOrElse(totalPath)
-  }
-
-  val initialState: State = State("", 0, 0)
-
-  val solution = aStar(initialState)
-
-  initialState.neighbors
-
-  initialState.down.get.up.get.hash
+  part2(gen0, 0)
 }
