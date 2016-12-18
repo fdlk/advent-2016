@@ -2,7 +2,7 @@ object day18 {
   val input: String = """.^^..^...^..^^.^^^.^^^.^^^^^^.^.^^^^.^^.^^^^^^.^...^......^...^^^..^^^.....^^^^^^^^^....^^...^^^^..^"""
 
   def nextChar(prev: String): Char =
-    if (prev == "^^." || prev == ".^^" || prev == "^.." || prev == "..^") '^' else '.'
+    if (List("^^.", ".^^", "^..", "..^").contains(prev)) '^' else '.'
 
   def next(line: String): String = ("." + line + ".").sliding(3).map(nextChar).mkString
 
