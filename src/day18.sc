@@ -8,5 +8,5 @@ object day18 {
   def safeTiles(line: String): Int = line.count(_ == '.')
 
   Stream.iterate(input, 40)(next).map(safeTiles).sum
-  Stream.iterate(input, 400000)(next).map(safeTiles).sum
+  Iterator.iterate(input)(next).map(safeTiles).take(4000000).sum
 }
