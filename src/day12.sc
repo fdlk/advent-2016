@@ -11,15 +11,16 @@ object day12 {
       case 'd' => copy(d = f(d)).jmp(1)
     }
 
-    def cpy(to: Char, from: Char): Regs = update(to, (_) => read(from))
+    def cpy(to: Char, from: String): Regs = update(to, (_) => read(from))
 
-    def jmp(offset: Int) = copy(ip = ip + offset)
+    def jmp(offset: Int): Regs = copy(ip = ip + offset)
 
-    def read(ab: Char): Long = ab match {
-      case 'a' => a
-      case 'b' => b
-      case 'c' => c
-      case 'd' => d
+    def read(arg: String): Long = arg match {
+      case "a" => a
+      case "b" => b
+      case "c" => c
+      case "d" => d
+      case _ => arg.toLong
     }
   }
 
@@ -34,19 +35,19 @@ object day12 {
       _.toInt
     }
 
-    def cpy = "cpy" ~> register ~ register ^^ { case from ~ to => r: Regs => r.cpy(to, from) }
+    def operand: Parser[String] = ("a" | "b" | "c" | "d" | offset) ^^ {
+      _.toString
+    }
 
-    def cpr = "cpy" ~> offset ~ register ^^ { case value ~ ab => r: Regs => r.update(ab, (_) => value.toLong) }
+    def cpy: Parser[Instruction] = "cpy" ~> operand ~ register ^^ { case from ~ to => r: Regs => r.cpy(to, from) }
 
-    def inc = "inc" ~> register ^^ { ab => r: Regs => r.update(ab, _ + 1) }
+    def inc: Parser[Instruction] = "inc" ~> register ^^ { arg => r: Regs => r.update(arg, _ + 1) }
 
-    def dec = "dec" ~> register ^^ { ab => r: Regs => r.update(ab, _ - 1) }
+    def dec: Parser[Instruction] = "dec" ~> register ^^ { arg => r: Regs => r.update(arg, _ - 1) }
 
-    def jnv = "jnz" ~> offset ~ offset ^^ { case x ~ offset => r: Regs => r.jmp(if (x != 0) offset else 1) }
+    def jnz: Parser[Instruction] = "jnz" ~> operand ~ offset ^^ { case arg ~ offset => r: Regs => r.jmp(if (r.read(arg) != 0) offset else 1) }
 
-    def jnz = "jnz" ~> register ~ offset ^^ { case ab ~ offset => r: Regs => r.jmp(if (r.read(ab) != 0) offset else 1) }
-
-    def instruction: Parser[Instruction] = cpr | cpy | inc | dec | jnz | jnv
+    def instruction: Parser[Instruction] = cpy | inc | dec | jnz
   }
 
   object InstructionParser extends InstructionParser
