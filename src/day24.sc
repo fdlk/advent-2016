@@ -78,9 +78,9 @@ object day24 {
 
   val pois: List[Char] = (maze.map(_.toSet).reduce(_++_) - '.' - '#').toList
 
-  val distances: Map[List[Char], Int] = (for (a <- pois; b <- pois) yield List(a, b) -> Location.distanceFrom(a, b)).toMap
+  val distances: Map[Set[Char], Int] = (for (a <- pois; b <- pois if b > a) yield Set(a, b) -> Location.distanceFrom(a, b)).toMap
 
-  def cost(route: List[Char]): Int = route.sliding(2).map(distances).sum
+  def cost(route: List[Char]): Int = route.sliding(2).map(_.toSet).map(distances).sum
 
   val part1: Int = pois.permutations.filter(_.head =='0').map(cost).min
 
