@@ -24,7 +24,7 @@ object day25 {
     }
   }
 
-  type Instruction = (Regs => Regs)
+  type Instruction = (Regs => (Regs, Option[Long]))
 
   class InstructionParser extends JavaTokenParsers {
     def register: Parser[Char] = ("a" | "b" | "c" | "d") ^^ {
@@ -39,41 +39,45 @@ object day25 {
       _.toString
     }
 
-    def cpy: Parser[Instruction] = "cpy" ~> operand ~ register ^^ { case from ~ to => r: Regs => r.cpy(to, from) }
+    def cpy: Parser[Instruction] = "cpy" ~> operand ~ register ^^ { case from ~ to => r: Regs => (r.cpy(to, from), None) }
 
-    def inc: Parser[Instruction] = "inc" ~> register ^^ { arg => r: Regs => r.update(arg, _ + 1) }
+    def inc: Parser[Instruction] = "inc" ~> register ^^ { arg => r: Regs => (r.update(arg, _ + 1), None) }
 
-    def dec: Parser[Instruction] = "dec" ~> register ^^ { arg => r: Regs => r.update(arg, _ - 1) }
+    def dec: Parser[Instruction] = "dec" ~> register ^^ { arg => r: Regs => (r.update(arg, _ - 1), None) }
 
-    def jnz: Parser[Instruction] = "jnz" ~> operand ~ offset ^^ { case arg ~ offset => r: Regs => r.jmp(if (r.read(arg) != 0) offset else 1) }
+    def jnz: Parser[Instruction] = "jnz" ~> operand ~ offset ^^ { case arg ~ offset => r: Regs => (r.jmp(if (r.read(arg) != 0) offset else 1), None) }
 
-    def out: Parser[Instruction] = "out" ~> register ^^ { arg => r: Regs => print(r.read(arg.toString)); r.jmp(1) }
+    def out: Parser[Instruction] = "out" ~> register ^^ { arg => r: Regs => (r.jmp(1), Some(r.read(arg.toString))) }
 
     def instruction: Parser[Instruction] = cpy | inc | dec | jnz | out
   }
 
   object InstructionParser extends InstructionParser
 
-  def step(r: Regs): Regs = {
-    program(r.ip)(r)
-  }
-
-  def execute(program: List[Instruction], initialState: Regs) = {
-    Stream.iterate(initialState)(step).take(1000000).toList
-  }
-
   val input: List[String] =
     fromInputStream(getClass.getResourceAsStream("day25.txt")).getLines.toList
 
   val program: List[Instruction] = input.map(line => InstructionParser.parseAll(InstructionParser.instruction, line).get)
 
-  val binarySolution: String = "010101010101"
-  val aToEnter = Integer.parseInt(binarySolution.reverse, 2) - offset
+  def step(regs: Regs): (Regs, Option[Long]) = program(regs.ip)(regs)
 
-  val offset = 362 * 7
-  val a = aToEnter
-  val output = Integer.toBinaryString(offset + a).toList.reverse.mkString
+  def execute(input: Regs): Stream[Regs] = Stream.iterate(input)((r: Regs) => step(r)._1)
 
-  val initialState = Regs(0, offset + a, 2, offset + a, 15)
-  execute(program,initialState)
+  def outputs(regs: Stream[Regs]): Stream[(Regs, Long)] =
+    regs.map(r => step(r)).filter(_._2.isDefined).map(x => (x._1, x._2.get))
+
+  def isValid(output: List[Long]): Boolean = output match {
+    case Nil => true
+    case 0 :: 1 :: rest => isValid(rest)
+    case default => false
+  }
+
+  def isSolution(i: Int): Boolean = {
+    val s: Stream[(Regs, Long)] = outputs(execute(Regs(i, 0, 0, 0, 0)))
+    val head: (Regs, Long) = s.head
+    val rest: List[Long] = s.tail.takeWhile(_ != head).map(_._2).toList
+    isValid(head._2 :: rest)
+  }
+
+  Stream.from(1).find(isSolution)
 }
